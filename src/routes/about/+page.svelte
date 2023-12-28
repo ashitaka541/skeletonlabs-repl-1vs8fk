@@ -3,11 +3,11 @@
     import TypewriterEffect from './TypewriterEffect.svelte';
 
     let activeSection = null;
-    let lastActiveSection = null;
+    let activatedSections = new Set();
 
     const sections = {
-       
-        'Our Mission': {
+        
+    'Our Mission': {
             fullText: 'To revolutionize ending homelessness with trauma-informed, evidence-based, client-directed services. Leveraging AI, data analysis, and SCRUM lean project management, we aim for continuously improving solutions that empower a transition from homelessness to stability and fulfillment.',
             summary: 'To revolutionize the approach to end homelessness.'
         },
@@ -27,35 +27,34 @@
     };
 
     function showSection(section) {
-        if (activeSection === section) {
-            activeSection = null;
-            lastActiveSection = null;
-        } else {
-            lastActiveSection = activeSection;
-            activeSection = section;
+        if (activeSection !== section) {
+            activatedSections.add(section);
         }
+        activeSection = section;
     }
 
-    $: textToShow = activeSection ? sections[activeSection].fullText : '';
-    $: summaryToShow = lastActiveSection ? sections[lastActiveSection].summary : '';
+    function displayText(section) {
+    if (activeSection === section) {
+        return sections[section].fullText; // Full text for the active section
+    } else if (activatedSections.has(section)) {
+        return sections[section].summary; // Summary for activated sections
+    }
+    return ''; // Nothing for non-activated sections
+}
 </script>
 
-<div class="container">
-    {#each Object.keys(sections) as section}
-        <div class="section">
-            <ClickableHeader 
-                title={section} 
-                on:click={() => showSection(section)} 
-                active={activeSection === section} />
-            {#if activeSection === section || lastActiveSection === section}
-                <TypewriterEffect 
-                    fullText={textToShow}
-                    summary={summaryToShow}
-                    speed={2}
-                    reverse={lastActiveSection === section} />
-            {/if}
-        </div>
-    {/each}
+<div class="container h-full mx-auto flex justify-center items-center">
+    <div class="space-y-10 text-center flex flex-col items-center">
+        {#each Object.keys(sections) as section}
+            <div class="section">
+                <ClickableHeader 
+                    title={section} 
+                    on:click={() => showSection(section)} 
+                    active={activeSection === section} />
+                <TypewriterEffect text={displayText(section)} speed={2} />
+            </div>
+        {/each}
+    </div>
 </div>
 
 <style>
@@ -64,10 +63,9 @@
         display: flex;
         justify-content: center;
         align-items: center;
-        flex-direction: column;
     }
 
     .section {
-        margin-bottom: 1rem;
+        text-align: center;
     }
 </style>

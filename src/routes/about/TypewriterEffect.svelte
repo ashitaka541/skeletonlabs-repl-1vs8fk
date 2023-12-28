@@ -1,35 +1,30 @@
 <script>
-    import { writable } from 'svelte/store';
-
-    export let fullText;
-    export let summary;
+    export let text;
     export let speed = 1;
-    export let reverse = false;
 
-    const text = writable('');
-    let isComplete = false;
-
-    function typewriter(node, { speed, reverse }) {
-        const targetText = reverse ? summary : fullText;
-        const duration = targetText.length * (100 / speed);
-        text.set('');
+    // Typewriter effect function
+    function typewriter(node, { speed }) {
+        const duration = text.length * (100 / speed);
 
         return {
             duration,
             tick: (t) => {
-                const i = Math.trunc(targetText.length * t);
-                text.set(targetText.slice(0, i));
-                if (i === targetText.length) {
-                    isComplete = true;
-                }
-            },
-            css: (t) => `opacity: ${t}`
+                const i = Math.trunc(text.length * t);
+                node.textContent = text.slice(0, i);
+            }
         };
     }
-
-    // No additional reactive statement is needed
 </script>
 
-<p transition:typewriter={{ speed, reverse }}>
-    {$text}
-</p>
+<div class="text-container">
+    <p transition:typewriter={{ speed }}>
+        {text}
+    </p>
+</div>
+
+<style>
+    .text-container {
+        width: 100%; /* Adjust as needed */
+        text-align: center;
+    }
+</style>
